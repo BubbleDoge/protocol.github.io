@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Protocol - Decentralized Intelligence on Sepolia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0B0818;
+            --text-color: #E0E0E0;
+            --card-bg: #1A162D;
+            --border-color: #2c2747;
+            --primary-color: #9333ea; /* Purple */
+            --secondary-color: #4f46e5; /* Indigo */
+            --gradient-text: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            --glow-color: rgba(147, 51, 234, 0.3);
+            --font-family: 'Inter', sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        h1, h2, h3 { line-height: 1.2; font-weight: 700; }
+        h1 { font-size: 3.5rem; }
+        h2 { font-size: 2.8rem; margin-bottom: 2rem; text-align: center; }
+        p { line-height: 1.7; color: #a3a3a3; }
+        .gradient-text { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .btn {
+            display: inline-block; padding: 14px 32px; border-radius: 50px;
+            font-weight: 600; text-align: center; transition: all 0.3s ease;
+            border: none; cursor: pointer; text-decoration: none;
+        }
+        .btn-nav-outline {
+            padding: 8px 24px;
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .btn-nav-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .btn-primary { background: var(--gradient-text); color: white; box-shadow: 0 4px 20px var(--glow-color); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 25px var(--glow-color); }
+        .btn.disabled { background: #30363d; color: #8b949e; cursor: not-allowed; box-shadow: none; }
+        .btn.disabled:hover { transform: none; }
+        .section { padding: 90px 0; }
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        .logo-svg { width: 40px; height: 40px; }
+        .navbar {
+            padding: 20px 0; position: sticky; top: 0;
+            background: rgba(11, 8, 24, 0.8);
+            backdrop-filter: blur(12px); z-index: 1000;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 12px; color: var(--text-color); text-decoration: none;}
+        .nav-links { display: flex; align-items: center; gap: 30px; }
+        .nav-links a { color: var(--text-color); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:not(.btn):hover { color: var(--primary-color); }
+        #hero {
+            padding: 80px 0; text-align: center; position: relative;
+            background: radial-gradient(ellipse at 50% -20%, rgba(147, 51, 234, 0.2), var(--bg-color) 40%);
+        }
+        #hero h1 { max-width: 800px; margin: 0 auto 1.5rem auto; }
+        #hero .slogan { font-size: 1.25rem; max-width: 600px; margin: 0 auto 3rem auto; }
+        #presale-panel {
+            background: var(--card-bg); border-radius: 16px; padding: 30px 40px;
+            max-width: 650px; margin: 0 auto;
+            border: 1px solid var(--border-color); box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .presale-header { text-align: center; margin-bottom: 25px; }
+        .presale-header h3 { font-size: 1.8rem; }
+        .presale-header p { font-size: 1.1rem; color: var(--primary-color); font-weight: 500; }
+        .presale-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; text-align: center; margin-bottom: 25px; }
+        .info-item h4 { font-size: 0.9rem; color: #a3a3a3; margin-bottom: 8px; font-weight: 500; text-transform: uppercase; }
+        .info-item p { font-size: 1.3rem; font-weight: 700; color: white; }
+        .progress-container { margin-bottom: 25px; }
+        .progress-labels { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: 500;}
+        .progress-bar { width: 100%; height: 10px; background: #0B0818; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; background: var(--gradient-text); border-radius: 5px; transition: width 0.5s ease-in-out; }
+        .action-container { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .action-container input {
+            width: 100%; padding: 16px; background: #0B0818;
+            border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-color); font-size: 1.1rem; text-align: center;
+        }
+        .action-container .btn { margin-top: 10px; }
+        #status-message { text-align: center; margin-top: 20px; font-weight: 500; min-height: 24px; transition: color 0.3s; }
+        .status-success { color: #34d399; } .status-error { color: #f87171; } .status-pending { color: #fbbf24; }
+        
+        .tokenomics-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+        }
+        .tokenomics-chart {
+            flex-shrink: 0;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: conic-gradient( #8A63D2 0% 35%, #4A4EEE 35% 60%, #3b82f6 60% 75%, #14b8a6 75% 90%, #f59e0b 90% 100% );
+        }
+        .tokenomics-info { flex-basis: 400px; }
+        .tokenomics-list { list-style: none; padding: 0; }
+        .tokenomics-list li { display: flex; align-items: center; margin-bottom: 10px; }
+        .tokenomics-list .color-box { width: 15px; height: 15px; border-radius: 3px; margin-right: 10px; }
+        
+        .grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .feature-card { background: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); transition: transform 0.3s, box-shadow 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 0 25px var(--glow-color); }
+        .feature-card .icon { font-size: 2.5rem; margin-bottom: 1rem; background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .faq-item { margin-bottom: 15px; } .faq-item details { background: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .faq-item summary { font-weight: 600; cursor: pointer; list-style: none; font-size: 1.1rem; }
+        .faq-item summary::after { content: '+'; float: right; font-size: 1.8rem; transition: transform 0.3s; }
+        .faq-item details[open] summary::after { transform: rotate(45deg); }
+        .faq-item p { margin-top: 15px; }
+        .roadmap-timeline { position: relative; max-width: 800px; margin: 0 auto; }
+        .roadmap-timeline::after { content: ''; position: absolute; width: 3px; background: var(--border-color); top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
+        .roadmap-item { padding: 10px 40px; position: relative; width: 50%; }
+        .roadmap-item::after {
+            content: ''; position: absolute; width: 20px; height: 20px;
+            background-color: var(--primary-color); border: 4px solid var(--bg-color);
+            top: 20px; border-radius: 50%; z-index: 1;
+        }
+        .roadmap-item.left { left: 0; text-align: right; padding-right: 30px; }
+        .roadmap-item.right { left: 50%; padding-left: 30px; }
+        .roadmap-item.left::after { right: -10px; }
+        .roadmap-item.right::after { left: -10px; }
+        .roadmap-content { padding: 20px 30px; background: var(--card-bg); border-radius: 8px; }
+        .footer { border-top: 1px solid var(--border-color); padding: 40px 0; text-align: center; }
+        .footer .logo { justify-content: center; margin-bottom: 20px; text-decoration: none; }
+        .social-links a { font-size: 1.5rem; margin: 0 12px; color: var(--text-color); transition: color 0.3s; }
+        .social-links a:hover { color: var(--primary-color); }
+        .footer p { margin-top: 20px; font-size: 0.9rem; }
+        
+        /* === "CHAT PROTOCOL" DIV STYLES (NO CHANGES NEEDED) === */
+        .cta-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 50px 40px;
+            border-radius: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; } h2 { font-size: 2.2rem; }
+            .nav-links { display: none; }
+            .roadmap-timeline::after { left: 10px; }
+            .roadmap-item, .roadmap-item.left, .roadmap-item.right { width: 100%; left: 0; padding-left: 50px; padding-right: 0; text-align: left;}
+            .roadmap-item::after { left: 1px; }
+            .tokenomics-content { flex-direction: column; }
+            .tokenomics-info { text-align: center; }
+            .tokenomics-list { text-align: left; display: inline-block; }
+        }
+    </style>
+</head>
+<body>
+    <svg width="0" height="0" style="display:none;"><symbol id="aura-logo" viewBox="0 0 100 100"><path d="M50 2.5 L95.5 27.5 L95.5 72.5 L50 97.5 L4.5 72.5 L4.5 27.5 Z M25 38 L50 25 L75 38 L75 62 L50 75 L25 62 Z" fill="none" stroke="white" stroke-width="5" stroke-linejoin="round"/></symbol></svg>
+
+    <header class="navbar">
+        <div class="container">
+            <a href="#" class="logo"><svg class="logo-svg"><use href="#aura-logo"></use></svg>Aura Protocol</a>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#tokenomics">Tokenomics</a>
+                <a href="#roadmap">Roadmap</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <button class="btn btn-primary" id="connect-btn">Connect Wallet</button> 
+        </div>
+    </header>
+
+    <main>
+        <section id="hero">
+            <div class="container">
+                <h1 class="fade-in gradient-text">Aura Protocol</h1>
+                <h2 class="h3 fade-in" style="font-weight: 500; margin-bottom: 1.5rem;">The new way to communicate with privacy, freedom, and rewards.</h2>
+                <p class="slogan fade-in">Aura Protocol is the first decentralized Web3 messaging platform where messages are paid with AURA tokens. Protect your privacy, avoid spam, and earn for participating.</p>
+                
+                <div id="presale-panel" class="fade-in" style="transition-delay: 0.2s;">
+                    <div class="presale-header">
+                        <h3>Live Presale</h3>
+                        <p id="countdown-timer">--:--:--:--</p>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-labels">
+                            <span id="progress-text">Raised: 0 / 0 ETH</span>
+                            <span id="progress-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+                    </div>
+                    <div class="presale-info-grid">
+                        <div class="info-item">
+                            <h4>Price</h4>
+                            <p id="presale-rate">1 ETH = --- AURA</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>Your Contribution</h4>
+                            <p id="user-contribution">0.00 ETH</p>
+                        </div>
+                    </div>
+                    <div class="action-container">
+                        <div id="buy-section" class="w-100">
+                            <input type="number" id="matic-amount-input" placeholder="Enter ETH Amount" min="0.01">
+                            <button class="btn btn-primary disabled mt-3" id="buy-btn">Buy Tokens</button>
+                        </div>
+                        <div id="claim-section" class="w-100" style="display: none;">
+                            <button class="btn btn-primary" id="claim-btn">Claim Your Tokens</button>
+                        </div>
+                    </div>
+                    <div id="status-message">Connect your wallet to participate. Tokens can be claimed after the presale ends.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === "CHAT PROTOCOL" DIV CONTENT UPDATED AS REQUESTED === -->
+        <section id="chat-protocol-cta" class="section text-center" style="padding-top: 45px; padding-bottom: 45px;">
+            <div class="container">
+                <div class="cta-card fade-in">
+                    <h2 class="gradient-text mb-3">Chat Protocol</h2>
+                    <p style="font-size: 1.1rem; max-width: 700px; line-height: 1.8; color: var(--text-color); margin-bottom: 1.5rem;">
+                        Your wallet is your identity. Access the messaging system of Aura Protocol, where each message is transmitted on-chain, ensuring privacy, censorship-resistance, and full transparency. Pay with AURA, stay connected, and do it all directly from your browser or mobile — fully decentralized and powered by Polygon.
+                    </p>
+                    <a href="mensajeria.html" target="_blank" class="btn btn-primary">Launch DApp</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="section">
+            <div class="container">
+                <h2 class="gradient-text">Protocol Features</h2>
+                <div class="grid-5">
+                    <div class="feature-card fade-in">
+                        <div class="icon"><i class="fas fa-layer-group"></i></div>
+                        <h3>Polygon Native</h3>
+                        <p>Fast transactions and low fees by operating on the Polygon (Matic) network.</p>
+                    </div>
+                    <div class="feature-card fade-in" style="transition-delay: 0.1s;">
+                        <div class="icon"><i class="fas fa-shield-halved"></i></div>
+                        <h3>100% Decentralized</h3>
+                        <p>Funds go directly to the smart contract, with no intermediaries, ensuring maximum security.</p>
+                    </div>
+                    <div class="feature-card fade-in" style="transition-delay: 0.2s;">
+                        <div class="icon"><i class="fas fa-rocket"></i></div>
+                        <h3>Scalable for the Future</h3>
+                        <p>Ready for DEX listings like QuickSwap and prepared to support a high volume of users.</p>
+                    </div>
+                    <div class="feature-card fade-in" style="transition-delay: 0.3s;">
+                        <div class="icon"><i class="fas fa-cubes"></i></div>
+                        <h3>Web3 Architecture</h3>
+                        <p>Login with MetaMask, direct contract interaction, and the full Web3 tech stack you know.</p>
+                    </div>
+                    <div class="feature-card fade-in" style="transition-delay: 0.4s;">
+                        <div class="icon"><i class="fas fa-wrench"></i></div>
+                        <h3>Coming Soon</h3>
+                        <p>Testnet faucet (Mumbai), full technical documentation, and tutorials for developers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="tokenomics" class="section">
+             <div class="container">
+                <h2 class="gradient-text">Tokenomics</h2>
+                <div class="tokenomics-content">
+                    <div class="tokenomics-chart fade-in"></div>
+                    <div class="tokenomics-info fade-in" style="transition-delay: 0.2s;">
+                        <h3>Total Supply: 100,000,000 AURA</h3>
+                        <ul class="tokenomics-list mt-4">
+                            <li><span class="color-box" style="background:#8A63D2;"></span>Presale: 30%</li>
+                            <li><span class="color-box" style="background:#4A4EEE;"></span>DEX Liquidity: 25%</li>
+                            <li><span class="color-box" style="background:#3b82f6;"></span>Platform Usage Rewards: 20%</li>
+                            <li><span class="color-box" style="background:#14b8a6;"></span>Development: 10%</li>
+                            <li><span class="color-box" style="background:#f59e0b;"></span>Marketing & Community: 10%</li>
+                            <li><span class="color-box" style="background:#ef4444;"></span>Team: 5%</li>
+                        </ul>
+                        <p class="mt-4">AURA was designed for a fair distribution, incentivizing real use of Web3 messaging, without manipulation or artificial inflation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="section" style="background-color: #110e22;">
+            <div class="container">
+                <h2 class="gradient-text">Our Roadmap</h2>
+                <div class="roadmap-timeline">
+                    <div class="roadmap-item right fade-in">
+                        <div class="roadmap-content">
+                            <h3>Q3 2025: Private Presale</h3>
+                            <p>Launch of the AURA token contract, start of the Private Presale for early backers, and initial social media promotion.</p>
+                        </div>
+                    </div>
+                    <div class="roadmap-item left fade-in">
+                        <div class="roadmap-content">
+                            <h3>Q4 2025: Public Presale & DEX Listing</h3>
+                            <p>Public Presale, DEX listing (QuickSwap, etc.), messaging platform beta on Polygon, and ENS integration.</p>
+                        </div>
+                    </div>
+                    <div class="roadmap-item right fade-in">
+                        <div class="roadmap-content">
+                            <h3>Q1 2026: Platform Growth</h3>
+                            <p>Send-to-earn rewards, partnerships with Web3 communities, and premium features unlocked with AURA.</p>
+                        </div>
+                    </div>
+                    <div class="roadmap-item left fade-in">
+                        <div class="roadmap-content">
+                            <h3>Q2 2026: Decentralization</h3>
+                            <p>Mobile app launch, NFT-based E2E encryption, and transition to decentralized governance (DAO).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="faq" class="section"> <div class="container" style="max-width: 800px;"> <h2 class="gradient-text">Frequently Asked Questions</h2> <div class="faq-list"> <div class="faq-item fade-in"><details><summary>What is Aura Protocol?</summary><p>Aura Protocol is a decentralized messaging platform where users pay with AURA tokens to send messages, avoiding spam and creating value.</p></details></div> <div class="faq-item fade-in"><details><summary>What is the AURA token for?</summary><p>It is used to send messages, unlock premium features, and participate in the protocol's governance.</p></details></div> <div class="faq-item fade-in"><details><summary>How do I participate in the presale?</summary><p>Connect your wallet, send MATIC to the contract, and claim your tokens when the sale ends.</p></details></div> <div class="faq-item fade-in"><details><summary>Where will AURA tokens be available after the presale?</summary><p>Initially on QuickSwap, with more listings to be announced.</p></details></div> <div class="faq-item fade-in"><details><summary>What network is used?</summary><p>Aura Protocol operates on the Polygon (Matic) network to minimize costs and maximize efficiency.</p></details></div> </div> </div> </section>
+    </main>
+
+    <footer class="footer"> <div class="container"> <a href="#" class="logo"> <svg class="logo-svg"><use href="#aura-logo"></use></svg> </a> <div class="social-links"> <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a> <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a> <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a> </div> <p>© 2024 Aura Protocol. All rights reserved. Tested on Sepolia.</p> </div> </footer>
+
+    <script>
+    // NO CHANGES WERE MADE TO THIS SCRIPT BLOCK, AS PER THE INSTRUCTIONS.
+    // IT REMAINS EXACTLY THE SAME AS THE PREVIOUS VERSION.
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURATION ---
+        const presaleContractAddress = "YOUR_PRESALE_CONTRACT_ADDRESS";
+        const presaleABI = [/* YOUR FULL ABI ARRAY */];
+        const sepoliaConfig = {
+            chainId: '0xaa36a7',
+            chainName: 'Sepolia',
+            rpcUrls: ['https://sepolia.infura.io/v3/YOUR_INFURA_PROJECT_ID'], 
+            nativeCurrency: { name: 'SepoliaETH', decimals: 18, symbol: 'ETH' },
+            blockExplorerUrls: ['https://sepolia.etherscan.io/']
+        };
+
+        // --- DOM & STATE ---
+        const connectBtn = document.getElementById('connect-btn');
+        const buyBtn = document.getElementById('buy-btn');
+        const claimBtn = document.getElementById('claim-btn');
+        const maticAmountInput = document.getElementById('matic-amount-input');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const presaleRateSpan = document.getElementById('presale-rate');
+        const userContributionSpan = document.getElementById('user-contribution');
+        const countdownTimerSpan = document.getElementById('countdown-timer');
+        const statusMessage = document.getElementById('status-message');
+        const buySection = document.getElementById('buy-section');
+        const claimSection = document.getElementById('claim-section');
+        let provider, signer, userAddress, presaleContract;
+        let countdownInterval;
+
+        // --- CORE FUNCTIONS ---
+        const connectWallet = async () => {
+            if (typeof window.ethereum === 'undefined') return setStatus('Please install MetaMask!', 'error');
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                const network = await provider.getNetwork();
+                if (network.chainId !== parseInt(sepoliaConfig.chainId, 16)) await switchNetwork();
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                presaleContract = new ethers.Contract(presaleContractAddress, presaleABI, signer);
+                updateUIAfterConnect();
+                await updatePresaleInfo();
+            } catch (error) {
+                console.error("Connection failed:", error);
+                setStatus('Wallet connection failed.', 'error');
+            }
+        };
+
+        const switchNetwork = async () => {
+            try {
+                await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: sepoliaConfig.chainId }] });
+            } catch (switchError) {
+                if (switchError.code === 4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [sepoliaConfig] });
+                else { setStatus('Please switch to the correct network.', 'error'); throw switchError; }
+            }
+        };
+        
+        const updatePresaleInfo = async () => {
+            try {
+                const readOnlyProvider = new ethers.providers.Web3Provider(window.ethereum || sepoliaConfig.rpcUrls[0]);
+                const readOnlyContract = new ethers.Contract(presaleContractAddress, presaleABI, readOnlyProvider);
+                const [isSaleActive, totalRaisedWei, hardCapWei, rate, secondsLeft] = await Promise.all([
+                    readOnlyContract.isSaleActive(),
+                    readOnlyContract.totalRaised(),
+                    readOnlyContract.hardCap(),
+                    readOnlyContract.rate(),
+                    readOnlyContract.secondsUntilSaleEnd()
+                ]);
+                const totalRaisedEth = ethers.utils.formatEther(totalRaisedWei);
+                const hardCapEth = ethers.utils.formatEther(hardCapWei);
+                const progress = hardCapWei.isZero() ? 0 : (parseFloat(totalRaisedEth) / parseFloat(hardCapEth)) * 100;
+                progressFill.style.width = `${Math.min(progress, 100)}%`;
+                progressText.textContent = `Raised: ${parseFloat(totalRaisedEth).toFixed(4)} / ${parseInt(hardCapEth)} ETH`;
+                progressPercentage.textContent = `${progress.toFixed(2)}%`;
+                presaleRateSpan.textContent = `1 ETH = ${rate.toString()} AURA`;
+                startCountdown(Number(secondsLeft));
+                buySection.style.display = isSaleActive ? 'block' : 'none';
+                if (userAddress) {
+                    const [contributionWei, hasClaimed] = await Promise.all([
+                        readOnlyContract.contributions(userAddress),
+                        readOnlyContract.claimed(userAddress)
+                    ]);
+                    const userContributed = contributionWei.gt(0);
+                    userContributionSpan.textContent = `${ethers.utils.formatEther(contributionWei)} ETH`;
+                    claimSection.style.display = (!isSaleActive && userContributed && !hasClaimed) ? 'block' : 'none';
+                }
+            } catch (error) {
+                console.error("Could not fetch presale info:", error);
+                setStatus('Could not load contract data. Check config.', 'error');
+            }
+        };
+
+        const buyTokens = async () => {
+            if (!signer) return setStatus('Please connect your wallet first.', 'error');
+            const amount = maticAmountInput.value;
+            if (!amount || parseFloat(amount) <= 0) return setStatus('Please enter a valid ETH amount.', 'error');
+            buyBtn.classList.add('disabled');
+            buyBtn.textContent = 'Processing...';
+            try {
+                setStatus('Preparing transaction...', 'pending');
+                const tx = await presaleContract.buyTokens({ value: ethers.utils.parseEther(amount) });
+                setStatus('Transaction sent, awaiting confirmation...', 'pending');
+                await tx.wait();
+                setStatus('Contribution successful!', 'success');
+                await updatePresaleInfo();
+                maticAmountInput.value = '';
+            } catch (error) {
+                const reason = error.reason || 'Transaction failed.';
+                setStatus(reason.charAt(0).toUpperCase() + reason.slice(1), 'error');
+            } finally {
+                buyBtn.classList.remove('disabled');
+                buyBtn.textContent = 'Buy Tokens';
+            }
+        };
+
+        const claimTokens = async () => {
+            if (!signer) return setStatus('Please connect your wallet first.', 'error');
+            claimBtn.classList.add('disabled');
+            claimBtn.textContent = 'Claiming...';
+            try {
+                setStatus('Preparing to claim your tokens...', 'pending');
+                const tx = await presaleContract.claimTokens();
+                await tx.wait();
+                setStatus('Tokens claimed successfully! Check your wallet.', 'success');
+                claimSection.style.display = 'none';
+            } catch (error) {
+                const reason = error.reason || 'Claim failed.';
+                setStatus(reason.charAt(0).toUpperCase() + reason.slice(1), 'error');
+            } finally {
+                claimBtn.classList.remove('disabled');
+                claimBtn.textContent = 'Claim Your Tokens';
+            }
+        };
+
+        const startCountdown = (seconds) => {
+            clearInterval(countdownInterval);
+            let remaining = seconds;
+            const formatTime = (s) => {
+                if (s <= 0) return "Sale Ended";
+                const d = Math.floor(s / (3600 * 24));
+                s -= d * 3600 * 24;
+                const h = Math.floor(s / 3600);
+                s -= h * 3600;
+                const m = Math.floor(s / 60);
+                s -= m * 60;
+                const sec = Math.floor(s);
+                return `${d}d : ${h.toString().padStart(2, '0')}h : ${m.toString().padStart(2, '0')}m : ${sec.toString().padStart(2, '0')}s`;
+            };
+            countdownTimerSpan.textContent = formatTime(remaining);
+            if (remaining <= 0) return;
+            countdownInterval = setInterval(() => {
+                remaining--;
+                countdownTimerSpan.textContent = formatTime(remaining);
+                if (remaining <= 0) {
+                    clearInterval(countdownInterval);
+                    updatePresaleInfo();
+                }
+            }, 1000);
+        };
+        const updateUIAfterConnect = () => {
+            connectBtn.textContent = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
+            buyBtn.classList.remove('disabled');
+            setStatus('Wallet connected. You can now contribute.', 'success');
+        };
+        const setStatus = (message, type) => {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-${type}`;
+        };
+        const setupEventListeners = () => {
+            connectBtn.addEventListener('click', connectWallet);
+            buyBtn.addEventListener('click', buyTokens);
+            claimBtn.addEventListener('click', claimTokens);
+            if (window.ethereum) {
+                window.ethereum.on('accountsChanged', () => window.location.reload());
+                window.ethereum.on('chainChanged', () => window.location.reload());
+            }
+        };
+        const observeFadeInElements = () => {
+            const observer = new IntersectionObserver((e) => { e.forEach(en => en.isIntersecting && en.target.classList.add('visible')); }, { threshold: 0.1 });
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        };
+        updatePresaleInfo();
+        setupEventListeners();
+        observeFadeInElements();
+    });
+    </script>
+</body>
+</html>
